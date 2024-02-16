@@ -1,19 +1,32 @@
+
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class DialogueSystem : MonoBehaviour
 {
-    [SerializeField] private DialogueContainer dialogueContainer= new DialogueContainer();
-    // Start is called before the first frame update
-    void Start()
+    public DialogueContainer dialogueContainer;
+
+    public static DialogueSystem instance;
+
+    private void Awake()
     {
-        
+        if (instance == null)
+            instance = this;
+        else
+            DestroyImmediate(gameObject);
     }
 
-    // Update is called once per frame
+    void Start()
+    {
+        dialogueContainer = gameObject.AddComponent<DialogueContainer>();
+        // Initialization logic here
+    }
+
     void Update()
     {
-        
+        // Update logic here
     }
 }
