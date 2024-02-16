@@ -3,16 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
-namespace TESTING
+
+public class Testing_Architect : MonoBehaviour
 {
-    public class Testing_Architect : MonoBehaviour
+    DialogueSystem ds;
+    TextArchitect architectWork;
+    int currentLineIndex = 0;
+
+    string[] lines = new string[9]
     {
-        DialogueSystem ds;
-        TextArchitect architect;
-
-
-        string[] lines = new string[9]
-        {
         "Where is he? He's always late.",
         "Look who finally decided to show up.",
         "Sorry, traffic was a nightmare.",
@@ -22,28 +21,39 @@ namespace TESTING
         "Seriously? That's fantastic! I knew you'd SLAYYY it.",
         "Thanks, Meg. Couldn't have done it without your pep talks.",
         "Fuck off cringy bij bye"
-        };
+    };
 
 
-        void Start()
+    void Start()
+    {
+        if (DialogueSystem.instance != null)
         {
-            ds = DialogueSystem.instance;
-            architect = new TextArchitect(ds.dialogueContainer.dialogueText);
-            architect.buildMethod = TextArchitect.BuildMethod.instant;
-            Debug.Log("TestingArchitect initialization is about to happen.");
-
+            // The singleton instance is properly set up
+            Debug.Log("DialogueSystem instance exists.");
         }
-
-
-
-        void Update()
+        else
         {
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                Debug.Log("Space key pressed" + "build method called is ");
-                architect.Build(lines[Random.Range(0, lines.Length)]);
-                Debug.Log("im not printing your shit");
-            }
+            // The singleton instance is not properly set up
+            Debug.LogError("DialogueSystem instance is null. Make sure it's properly assigned.");
+        }
+        Debug.Log("TestingArchitect initialization is about to happen.");
+        ds = DialogueSystem.instance;
+        architectWork = new TextArchitect(ds.dialogueContainer.dialogueText);
+        architectWork.buildMethod = TextArchitect.BuildMethod.instant;
+        Debug.Log("TestingArchitect initialization is happening.");
+        architectWork.Build(lines[currentLineIndex]);
+        currentLineIndex++;
+
+    }
+
+    void Update()
+    {
+        if (Input.GetKeyDown("space") && (currentLineIndex < lines.Length))
+        {
+            Debug.Log("Space key pressed" + "Building next line.");
+            architectWork.Build(lines[currentLineIndex]);
+            Debug.Log("im printing your next line la calm down");
+            currentLineIndex++;
         }
     }
 }

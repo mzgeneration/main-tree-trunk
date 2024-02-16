@@ -5,7 +5,7 @@ using UnityEngine;
 using TMPro;
 
 [System.Serializable]
-public class DialogueContainer : MonoBehaviour
+public class DialogueContainer
 
 {
     public GameObject root;
