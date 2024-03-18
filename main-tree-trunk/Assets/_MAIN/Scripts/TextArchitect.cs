@@ -22,7 +22,7 @@ public class TextArchitect : MonoBehaviour
 
     public string targetText { get; private set; } = "";
     public string preText { get; private set; } = "";
-    //private int preTextLength = 0;
+    private int preTextLength = 0;
 
     public string fullTargetText => preText + targetText;
 
@@ -90,7 +90,7 @@ public class TextArchitect : MonoBehaviour
     /// <summary>
     /// establishing stop function
     /// </summary>
-   /* public void Stop()
+    public void Stop()
     {
         Debug.Log("Before condition check. isBuilding: " + isBuilding);
 
@@ -104,7 +104,7 @@ public class TextArchitect : MonoBehaviour
         Debug.Log("PLS STOPPP222");
         buildProcess = null;
         Debug.Log("PLS STOPPP3333");
-    } */
+    }
     private IEnumerator Building()
     {
         Debug.Log("Building coroutine started.");
@@ -116,14 +116,14 @@ public class TextArchitect : MonoBehaviour
                 Debug.Log("Instant build selected.");
                 yield return Build_Instant();
                 break;
-                /* case BuildMethod.typewriter:
-                     Debug.Log("Typewriter build selected.");
-                     yield return Build_Typewriter();
-                     break;
-                 case BuildMethod.fade:
-                     Debug.Log("Fade build selected.");
-                     yield return Build_Fade();
-                     break;*/
+            case BuildMethod.typewriter:
+                Debug.Log("Typewriter build selected.");
+                yield return Build_Typewriter();
+                break;
+            case BuildMethod.fade:
+                Debug.Log("Fade build selected.");
+                yield return Build_Fade();
+                break;
         }
 
         OnComplete();
@@ -135,6 +135,21 @@ public class TextArchitect : MonoBehaviour
     private void OnComplete()
     {
         buildProcess = null;
+        hurryUp = false;
+    }
+
+    public void ForceComplete()
+    {
+        switch (buildMethod)
+        {
+            case BuildMethod.typewriter:
+                tmpro.maxVisibleCharacters = tmpro.textInfo.characterCount;
+                break;
+            case BuildMethod.fade:
+                break;
+        }
+        Stop();
+        OnComplete();
     }
 
     private void Prepare()
@@ -145,14 +160,14 @@ public class TextArchitect : MonoBehaviour
                 Prepare_Instant();
                 Debug.Log("instant prepared.");
                 break;
-                /*case BuildMethod.typewriter:
-                    Prepare_Typewriter();
-                    Debug.Log("typewriter prepared.");
-                    break;
-                case BuildMethod.fade:
-                    Prepare_Fade();
-                    Debug.Log("fade prepared.");
-                    break;*/
+            case BuildMethod.typewriter:
+                Prepare_Typewriter();
+                Debug.Log("typewriter prepared.");
+                break;
+            case BuildMethod.fade:
+                Prepare_Fade();
+                Debug.Log("fade prepared.");
+                break;
         }
     }
 
@@ -164,25 +179,59 @@ public class TextArchitect : MonoBehaviour
         tmpro.maxVisibleCharacters = tmpro.textInfo.characterCount;
     }
 
-    /* private void Prepare_Typewriter()
-     {
-         tmpro.color = tmpro.color;
-         tmpro.maxVisibleCharacters = 0;
-         tmpro.text = preText;
-         if (preText != "")
-         {
-             tmpro.ForceMeshUpdate(true);
-             tmpro.maxVisibleCharacters = tmpro.textInfo.characterCount;
-         }
-         tmpro.text += targetText;
-         tmpro.ForceMeshUpdate(false);
-         // TODO: Implement Typewriter preparation logic
-     }
+    private void Prepare_Typewriter()
+    {
+        tmpro.color = tmpro.color;
+        tmpro.maxVisibleCharacters = 0;
+        tmpro.text = preText;
+        if (preText != "")
+        {
+            tmpro.ForceMeshUpdate(true);
+            tmpro.maxVisibleCharacters = tmpro.textInfo.characterCount;
+        }
+        tmpro.text += targetText;
+        tmpro.ForceMeshUpdate();
+        // TODO: Implement Typewriter preparation logic
+    }
 
-     private void Prepare_Fade()
-     {
-         // TODO: Implement Fade preparation logic
-     }*/
+    private void Prepare_Fade()
+    {
+        tmpro.text = preText;
+        if (preText != "")
+        {
+            tmpro.ForceMeshUpdate();
+            preTextLength = tmpro.textInfo.characterCount;
+        }
+        preTextLength = 0;
+
+        tmpro.text += targetText;
+        tmpro.maxVisibleCharacters = int.MaxValue;
+        tmpro.ForceMeshUpdate();
+
+        TMP_TextInfo textInfo = tmpro.textInfo;
+
+        Color colorVisible = new Color(textColor.r, textColor.g, textColor.b, 1);
+        Color colorHidden = new Color(textColor.r, textColor.g, textColor.b, 0);
+
+        Color32[] vertexColors = textInfo.meshInfo[textInfo.characterInfo[0].materialReferenceIndex].colors32;
+        for (int i = 0; i < textInfo.characterCount; i++)
+        {
+            TMP_CharacterInfo charInfo = textInfo.characterInfo[i];
+
+            if (i < preTextLength)
+            {
+                for (int v = 0; v < 4; v++)
+                    vertexColors[charInfo.vertexIndex + v] = colorVisible;
+            }
+            else
+            {
+                for (int v = 0; v < 4; v++)
+                    vertexColors[charInfo.vertexIndex + v] = colorHidden;
+            }
+        }
+        tmpro.UpdateVertexData(TMP_VertexDataUpdateFlags.Colors32);
+    }
+    // fade effect stoped at 10:24
     private IEnumerator Build_Instant()
     {
         // Instantly display the entire text
@@ -190,26 +239,26 @@ public class TextArchitect : MonoBehaviour
         Debug.Log("instant build process started.");
         yield break; // Coroutine ends immediately
     }
-    /* private IEnumerator Build_Typewriter()
-     {
-         while (tmpro.maxVisibleCharacters < tmpro.textInfo.characterCount)
-         {
-             tmpro.maxVisibleCharacters += hurryUp ? charactersPerCycle * 5 : charactersPerCycle;
-             yield return new WaitForSeconds(0.015f / speed);
-         }
-         Debug.Log("Typewriter build process started.");
-         // TODO: Implement Typewriter build logic
-         yield return null;
-         Debug.Log("Typewriter build process completed.");
-     }
+    private IEnumerator Build_Typewriter()
+    {
+        while (tmpro.maxVisibleCharacters < tmpro.textInfo.characterCount)
+        {
+            tmpro.maxVisibleCharacters += hurryUp ? charactersPerCycle * 5 : charactersPerCycle;
+            yield return new WaitForSeconds(0.015f / speed);
+        }
+        Debug.Log("Typewriter build process started.");
+        // TODO: Implement Typewriter build logic
+        yield return null;
+        Debug.Log("Typewriter build process completed.");
+    }
 
-     private IEnumerator Build_Fade()
-     {
-         Debug.Log("Fade build process started.");
-         // TODO: Implement Fade build logic
-         yield return null;
-         Debug.Log("Fade build process completed.");
-     }*/
+    private IEnumerator Build_Fade()
+    {
+        Debug.Log("Fade build process started.");
+        // TODO: Implement Fade build logic
+        yield return null;
+        Debug.Log("Fade build process completed.");
+    }
 
     void Update()
     {

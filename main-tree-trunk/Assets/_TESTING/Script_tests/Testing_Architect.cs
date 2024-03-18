@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using Unity.VisualScripting;
+using System;
 
 
 public class Testing_Architect : MonoBehaviour
@@ -39,20 +41,57 @@ public class Testing_Architect : MonoBehaviour
         Debug.Log("TestingArchitect initialization is about to happen.");
         ds = DialogueSystem.instance;
         architectWork = new TextArchitect(ds.dialogueContainer.dialogueText);
-        architectWork.buildMethod = TextArchitect.BuildMethod.instant;
+        architectWork.buildMethod = TextArchitect.BuildMethod.typewriter;
         Debug.Log("TestingArchitect initialization is happening.");
         architectWork.Build(lines[currentLineIndex]);
         currentLineIndex++;
 
     }
 
+    /* void Update()
+     {
+         if (Input.GetKeyDown("space") && (currentLineIndex < lines.Length))
+         {
+             architectWork.Build(lines[currentLineIndex]);
+             currentLineIndex++;
+         }
+         else if (Input.GetKeyDown("A")) //not working
+         {
+             architectWork.Append(lines[currentLineIndex]);
+             currentLineIndex++;
+         }
+     }*/
+
     void Update()
     {
-        if (Input.GetKeyDown("space") && (currentLineIndex < lines.Length))
+        // string longLine = "this is a bloody long line that makes no sense because idk whats wrong with this fella rambling and i cannot catch up so like hor idk la we just see how ah hor";
+        if (Input.GetKeyDown("space"))
         {
-            Debug.Log("Space key pressed" + "Building next line.");
-            architectWork.Build(lines[currentLineIndex]);
-            Debug.Log("im printing your next line la calm down");
+            if (architectWork.isBuilding)
+            {
+                if (!architectWork.hurryUp)
+                {
+                    architectWork.hurryUp = true;
+                }
+                else
+                {
+                    architectWork.ForceComplete();
+                }
+            }
+            else
+            {
+                if (currentLineIndex >= lines.Length)
+                {
+                    // If we have reached the end of the array, reset the index to start over
+                    currentLineIndex = 0;
+                }
+                architectWork.Build(lines[currentLineIndex]);
+                currentLineIndex++;
+            }
+        }
+        else if (Input.GetKeyDown("A"))
+        {
+            architectWork.Append(lines[currentLineIndex]);
             currentLineIndex++;
         }
     }
