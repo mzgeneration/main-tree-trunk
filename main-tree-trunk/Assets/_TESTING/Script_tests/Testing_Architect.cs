@@ -89,10 +89,6 @@ public class Testing_Architect : MonoBehaviour
                 currentLineIndex++;
             }
         }
-        else if (Input.GetKeyDown("A"))
-        {
-            architectWork.Append(lines[currentLineIndex]);
-            currentLineIndex++;
-        }
+
     }
 }
