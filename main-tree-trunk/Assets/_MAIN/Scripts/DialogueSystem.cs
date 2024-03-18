@@ -1,19 +1,38 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class DialogueSystem : MonoBehaviour
 {
-    [SerializeField] private DialogueContainer dialogueContainer= new DialogueContainer();
-    // Start is called before the first frame update
-    void Start()
+    [SerializeField] public DialogueContainer dialogueContainer = new DialogueContainer();
+
+    public static DialogueSystem instance;
+
+    private void Awake()
     {
-        
+        if (instance == null)
+        {
+            instance = this;
+            Debug.Log("instance is == this in DS at awake");
+            DontDestroyOnLoad(gameObject);
+            Debug.Log("gameobject not destroyed yet");
+        } //Ensure persistence across scenes
+        else
+        {
+            DestroyImmediate(gameObject);
+            Debug.Log("game object is destroyed immediately");
+        }
     }
 
-    // Update is called once per frame
+    void Start()
+    {
+        Debug.Log("Dialogue system initialised");
+    }
+
     void Update()
     {
-        
+
+        // Update logic here
     }
 }
